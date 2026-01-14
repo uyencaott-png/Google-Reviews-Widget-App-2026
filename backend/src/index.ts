@@ -320,6 +320,7 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="referrer" content="no-referrer">
       <meta http-equiv="refresh" content="3;url=${googleUrl}">
       <title>View Reviews on Google</title>
       <style>
@@ -340,56 +341,50 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
           box-shadow: 0 20px 60px rgba(0,0,0,0.3);
           text-align: center;
           max-width: 500px;
+          width: 90%;
         }
         h1 {
-          margin: 0 0 20px 0;
-          color: #1a1a1a;
+          color: #1a73e8;
           font-size: 24px;
+          margin: 0 0 10px 0;
         }
         p {
-          color: #666;
-          margin: 0 0 30px 0;
-          line-height: 1.6;
+          color: #5f6368;
+          line-height: 1.5;
+          margin-bottom: 30px;
         }
         .button {
           display: inline-block;
-          padding: 14px 32px;
-          background: #4285F4;
+          background-color: #1a73e8;
           color: white;
-          text-decoration: none;
+          padding: 14px 32px;
           border-radius: 8px;
+          text-decoration: none;
           font-weight: 600;
-          font-size: 16px;
           transition: background 0.2s;
-          margin: 10px;
-          cursor: pointer;
           border: none;
+          cursor: pointer;
+          font-size: 16px;
         }
         .button:hover {
-          background: #357ae8;
+          background-color: #1765cf;
         }
         .link {
           display: block;
-          margin-top: 20px;
-          padding: 12px;
-          background: #f5f5f5;
-          border-radius: 8px;
-          word-break: break-all;
-          font-size: 14px;
-          color: #4285F4;
+          margin-top: 25px;
+          font-size: 12px;
+          color: #999;
           text-decoration: none;
-        }
-        .link:hover {
-          background: #eeeeee;
+          word-break: break-all;
         }
         .loader {
-          width: 40px;
-          height: 40px;
+          width: 48px;
+          height: 48px;
           border: 4px solid #f3f3f3;
-          border-top: 4px solid #4285F4;
+          border-top: 4px solid #1a73e8;
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin: 20px auto;
+          margin: 0 auto 20px;
         }
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -402,14 +397,25 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
         <div class="loader"></div>
         <h1>🔍 View Reviews on Google</h1>
         <p>You are being redirected to view reviews for <strong>${businessName || 'this business'}</strong> on Google.</p>
-        <button onclick="window.location.replace('${googleUrl}')" class="button">Continue to Google Reviews</button>
-        <a href="${googleUrl}" class="link">Redirecting to: ${googleUrl}</a>
+        
+        <a href="${googleUrl}" target="_top" class="button">Continue to Google Reviews</a>
+        
         <script>
-          // Automatic redirect after 1 second
+          // Automatic redirect with iframe breakout
           setTimeout(function() {
-            window.location.replace('${googleUrl}');
-          }, 1000);
+            try {
+              if (window.top) {
+                window.top.location.href = "${googleUrl}";
+              } else {
+                window.location.href = "${googleUrl}";
+              }
+            } catch (e) {
+              window.location.href = "${googleUrl}";
+            }
+          }, 2000);
         </script>
+        
+        <a href="${googleUrl}" target="_top" class="link">Redirecting to: ${googleUrl}</a>
       </div>
     </body>
     </html>
