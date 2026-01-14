@@ -301,19 +301,21 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
 
   if (placeId) {
     if (type === "write") {
-      // Direct link to write a review
       googleUrl = `https://search.google.com/local/writereview?placeid=${placeId}`;
     } else {
-      // Reliable link to view reviews on Google Maps
-      googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(businessName || 'Business')}&query_place_id=${placeId}`;
+      // Use the ultra-stable local reviews page URL
+      googleUrl = `https://search.google.com/local/reviews?placeid=${placeId}`;
     }
   } else {
-    // Fallback to Google Maps search even if placeId is missing, to avoid generic search CSP blocks
+    // Fallback to Google Maps search with query
     googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((businessName || 'Business') + ' reviews')}`;
   }
 
-  // Return HTML page with JavaScript auto-redirect (bypasses iframe/CSP restrictions)
+  // Set security headers to bypass browser blocks
   res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -321,11 +323,10 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta name="referrer" content="no-referrer">
-      <meta http-equiv="refresh" content="3;url=${googleUrl}">
       <title>View Reviews on Google</title>
       <style>
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -340,19 +341,11 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
           border-radius: 16px;
           box-shadow: 0 20px 60px rgba(0,0,0,0.3);
           text-align: center;
-          max-width: 500px;
+          max-width: 450px;
           width: 90%;
         }
-        h1 {
-          color: #1a73e8;
-          font-size: 24px;
-          margin: 0 0 10px 0;
-        }
-        p {
-          color: #5f6368;
-          line-height: 1.5;
-          margin-bottom: 30px;
-        }
+        h1 { color: #1a73e8; font-size: 24px; margin: 0 0 10px 0; }
+        p { color: #5f6368; line-height: 1.5; margin-bottom: 30px; }
         .button {
           display: inline-block;
           background-color: #1a73e8;
@@ -361,21 +354,9 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
           border-radius: 8px;
           text-decoration: none;
           font-weight: 600;
-          transition: background 0.2s;
-          border: none;
-          cursor: pointer;
           font-size: 16px;
-        }
-        .button:hover {
-          background-color: #1765cf;
-        }
-        .link {
-          display: block;
-          margin-top: 25px;
-          font-size: 12px;
-          color: #999;
-          text-decoration: none;
-          word-break: break-all;
+          cursor: pointer;
+          border: none;
         }
         .loader {
           width: 48px;
@@ -396,26 +377,24 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
       <div class="container">
         <div class="loader"></div>
         <h1>🔍 View Reviews on Google</h1>
-        <p>You are being redirected to view reviews for <strong>${businessName || 'this business'}</strong> on Google.</p>
+        <p>Redirecting you to view reviews for <strong>${businessName || 'this business'}</strong>.</p>
         
-        <a href="${googleUrl}" target="_top" class="button">Continue to Google Reviews</a>
+        <a href="${googleUrl}" target="_top" rel="noreferrer" class="button">Continue to Google Reviews</a>
         
         <script>
-          // Automatic redirect with iframe breakout
+          // Instant direct navigation to bypass security flags
           setTimeout(function() {
             try {
               if (window.top) {
-                window.top.location.href = "${googleUrl}";
+                window.top.location.replace("${googleUrl}");
               } else {
-                window.location.href = "${googleUrl}";
+                window.location.replace("${googleUrl}");
               }
             } catch (e) {
-              window.location.href = "${googleUrl}";
+              window.location.replace("${googleUrl}");
             }
-          }, 2000);
+          }, 500);
         </script>
-        
-        <a href="${googleUrl}" target="_top" class="link">Redirecting to: ${googleUrl}</a>
       </div>
     </body>
     </html>
