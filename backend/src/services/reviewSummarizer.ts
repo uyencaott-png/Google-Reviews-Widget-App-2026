@@ -36,7 +36,7 @@ export async function summarizeReviews(reviews: Review[], apiKey?: string): Prom
   try {
     const genAI = new GoogleGenerativeAI(effectiveKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       generationConfig: { responseMimeType: "application/json" }
     });
 
