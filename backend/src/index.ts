@@ -301,20 +301,19 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
 
   if (placeId) {
     if (type === "write") {
-      googleUrl = `https://search.google.com/local/writereview?placeid=${placeId}`;
+      // Deep link to write a review via Google Search
+      googleUrl = `https://www.google.com/search?q=${encodeURIComponent(businessName || 'Business')}+reviews#lrd=${placeId},2`;
     } else {
-      // Use the ultra-stable local reviews page URL
-      googleUrl = `https://search.google.com/local/reviews?placeid=${placeId}`;
+      // Deep link to view reviews via Google Search
+      googleUrl = `https://www.google.com/search?q=${encodeURIComponent(businessName || 'Business')}+reviews#lrd=${placeId},1`;
     }
   } else {
     // Fallback to Google Maps search with query
     googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((businessName || 'Business') + ' reviews')}`;
   }
 
-  // Set security headers to bypass browser blocks
+  // Use standard HTML response without aggressive security headers that might cause blocks
   res.setHeader('Content-Type', 'text/html');
-  res.setHeader('Referrer-Policy', 'no-referrer');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
   res.send(`
     <!DOCTYPE html>
@@ -322,7 +321,6 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="referrer" content="no-referrer">
       <title>View Reviews on Google</title>
       <style>
         body {
@@ -379,10 +377,10 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
         <h1>🔍 View Reviews on Google</h1>
         <p>Redirecting you to view reviews for <strong>${businessName || 'this business'}</strong>.</p>
         
-        <a href="${googleUrl}" target="_top" rel="noreferrer" class="button">Continue to Google Reviews</a>
+        <a href="${googleUrl}" target="_top" class="button">Continue to Google Reviews</a>
         
         <script>
-          // Instant direct navigation to bypass security flags
+          // Standard redirection using top-level window
           setTimeout(function() {
             try {
               if (window.top) {
@@ -393,7 +391,7 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
             } catch (e) {
               window.location.replace("${googleUrl}");
             }
-          }, 500);
+          }, 1000);
         </script>
       </div>
     </body>
