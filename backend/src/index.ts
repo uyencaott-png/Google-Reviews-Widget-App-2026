@@ -301,11 +301,11 @@ app.get("/api/redirect/google-reviews", async (req: any, res: any) => {
 
   if (placeId) {
     if (type === "write") {
-      // Deep link to write a review via Google Search
-      googleUrl = `https://www.google.com/search?q=${encodeURIComponent(businessName || 'Business')}+reviews#lrd=${placeId},2`;
+      // Direct link to write a review via Google Local
+      googleUrl = `https://search.google.com/local/writereview?placeid=${placeId}`;
     } else {
-      // Deep link to view reviews via Google Search
-      googleUrl = `https://www.google.com/search?q=${encodeURIComponent(businessName || 'Business')}+reviews#lrd=${placeId},1`;
+      // Direct link to view reviews via Google Local
+      googleUrl = `https://search.google.com/local/reviews?placeid=${placeId}`;
     }
   } else {
     // Fallback to Google Maps search with query
